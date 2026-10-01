@@ -13,6 +13,8 @@ fi
 
 # Install requirements
 echo "🐍 Проверка зависимостей Python..."
+pip install --upgrade pip
+pip install python-multipart
 pip install -r requirements.txt
 
 # Start server
