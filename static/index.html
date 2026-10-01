@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BubaClipper Studio Pro - Нарезка роликов под БУБА VPN</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-badge">BUBA</div>
+      <div class="logo-title">Clipper Studio Pro 🚀</div>
+    </div>
+    <div class="header-status">
+      <div class="pulse-dot"></div>
+      <span id="hwAccelText">Metal H.264 Hardware Acceleration Active</span>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (3 COLUMNS) -->
+  <div class="main-container">
+
+    <!-- LEFT COLUMN: Studio Controls -->
+    <div class="card editor-card">
+      
+      <!-- Source Files & Import -->
+      <div class="card-title">
+        <span>🎬 Исходные материалы</span>
+      </div>
+
+      <div class="import-section">
+        <div class="import-label">📥 Скачать по ссылке (YouTube / Shorts / TikTok):</div>
+        <div class="input-with-button">
+          <input type="text" id="urlDownloadInput" placeholder="Вставьте ссылку на ролик...">
+          <button class="btn-action" id="btnDownloadUrl" onclick="downloadVideoFromUrl()">⬇️ Скачать</button>
+        </div>
+        <div id="urlDownloadStatus" class="status-msg" style="display: none;"></div>
+
+        <div class="file-upload-row">
+          <span>Или выберите файл с диска:</span>
+          <label class="btn-secondary file-label">
+            📁 Загрузить файл
+            <input type="file" id="fileUploadInput" onchange="uploadLocalFile(event)" accept="video/*,.webm,.mp4,.mov">
+          </label>
+        </div>
+        <div id="fileUploadStatus" class="status-msg" style="display: none;"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Основное видео (Спикер / Подкаст)</label>
+        <select id="mainVideoSelect"></select>
+        <div id="mainVideoInfo" class="input-info"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Фоновое видео (Subway Surfers)</label>
+        <select id="bgVideoSelect"></select>
+        <div id="bgVideoInfo" class="input-info"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Анимированный баннер (@bubabot)</label>
+        <select id="bannerSelect"></select>
+      </div>
+
+      <!-- Split Ratio Customizer -->
+      <div class="card-title" style="margin-top: 6px;">
+        <span>🎚️ Разделение экрана (Сплит)</span>
+        <span id="splitRatioLabel" class="accent-badge">50% / 50%</span>
+      </div>
+      <div class="form-group">
+        <input type="range" id="splitRatioSlider" min="30" max="70" value="50" step="5" oninput="updateSplitRatio(this.value)">
+        <div class="slider-labels">
+          <span>Спикер 70%</span>
+          <span>50/50</span>
+          <span>Сабвей 70%</span>
+        </div>
+      </div>
+
+      <!-- Subtitle Styling Controls -->
+      <div class="card-title" style="margin-top: 6px;">
+        <span>💬 Стиль субтитров (Whisper AI)</span>
+      </div>
+      <div class="sub-styling-box">
+        <label class="checkbox-row">
+          <input type="checkbox" id="generateSubtitlesCheck" checked onchange="updateMockSubs()">
+          <b>Генерировать субтитры в стиле TikTok</b>
+        </label>
+        <div class="form-row">
+          <div class="col">
+            <label>Шрифт</label>
+            <select id="subFontSelect" onchange="updateMockSubs()">
+              <option value="Arial Black" selected>Arial Black (Жирный)</option>
+              <option value="Impact">Impact (Классика)</option>
+              <option value="Helvetica">Helvetica Bold</option>
+              <option value="Arial">Arial Bold</option>
+            </select>
+          </div>
+          <div class="col">
+            <label>Цвет текста</label>
+            <select id="subColorSelect" onchange="updateMockSubs()">
+              <option value="yellow" selected>🟡 Желтый TikTok</option>
+              <option value="green">🟢 Неоновый зеленый</option>
+              <option value="cyan">🔵 Циан / Голубой</option>
+              <option value="white">⚪ Чистый белый</option>
+              <option value="fire">🔥 Огненный акцент</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col">
+            <label>Размер: <span id="subSizeVal">56px</span></label>
+            <input type="range" id="subSizeSlider" min="36" max="76" value="56" oninput="updateMockSubs()">
+          </div>
+          <div class="col">
+            <label>Обводка: <span id="subStrokeVal">5px</span></label>
+            <input type="range" id="subStrokeSlider" min="2" max="8" value="5" oninput="updateMockSubs()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner Rules & Chroma Settings -->
+      <div class="card-title" style="margin-top: 6px;">
+        <span>🎯 Баннер BUBA VPN (Гарантия $\ge 25\%$)</span>
+      </div>
+      <div class="banner-settings-box">
+        <div class="preset-pills">
+          <div class="preset-pill active" id="pillBannerEdge" onclick="setBannerPreset('edge')">🛡️ 1260×550 (25.8% Норма)</div>
+          <div class="preset-pill" id="pillBannerSafe" onclick="setBannerPreset('safe')">🔥 1320×575 (27.5% Запас)</div>
+          <div class="preset-pill" id="pillBanner25" onclick="setBannerPreset('25')">⚠️ 1080×434 (18.5% Риск)</div>
+        </div>
+        <div id="bannerPctLabel" class="banner-coverage-label">
+          ✅ Чистая видимая площадь баннера: 25.79% (Гарантированная выплата)
+        </div>
+
+        <label class="checkbox-row" style="margin-top: 8px;">
+          <input type="checkbox" id="pauseOnBannerCheck" checked>
+          <span><b>⏸️ Заморозка видео на время рекламы</b> (голос не прерывается)</span>
+        </label>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="removeBlueBgCheck">
+          <span><b>🎬 Удаление синего фона (ChromaKey + Despill)</b></span>
+        </label>
+
+        <div style="margin-top: 8px;">
+          <label style="font-size: 11px; color: var(--text-muted);">Скорость баннера (Правило 3.6: до 1.2×):</label>
+          <div class="preset-pills" style="margin-top: 4px;">
+            <div class="preset-pill active" id="speed10" onclick="setBannerSpeed(1.0)">1.0× Обычная</div>
+            <div class="preset-pill" id="speed11" onclick="setBannerSpeed(1.1)">1.1× (+10%)</div>
+            <div class="preset-pill" id="speed12" onclick="setBannerSpeed(1.2)">1.2× Максимум</div>
+          </div>
+        </div>
+
+        <div class="mirror-row">
+          <span style="color: var(--text-muted); font-size: 12px;">🪞 Зеркало (hflip):</span>
+          <label class="checkbox-inline"><input type="checkbox" id="mirrorTopCheck"> Спикер</label>
+          <label class="checkbox-inline"><input type="checkbox" id="mirrorBottomCheck"> Сабвей</label>
+        </div>
+      </div>
+
+      <!-- Mode Selector & Render Triggers -->
+      <div class="tabs" style="margin-top: 6px;">
+        <button class="tab-btn active" id="tabBatch" onclick="switchMode('batch')">⚡ Пакетная нарезка</button>
+        <button class="tab-btn" id="tabSingle" onclick="switchMode('single')">✂️ Одиночный клип</button>
+      </div>
+
+      <div id="batchControls">
+        <div class="preset-pills" style="margin-bottom: 8px;">
+          <div class="preset-pill" onclick="setClipDuration(45)">45 сек</div>
+          <div class="preset-pill active" id="pill60" onclick="setClipDuration(60)">60 сек</div>
+          <div class="preset-pill" onclick="setClipDuration(75)">75 сек</div>
+          <div class="preset-pill" onclick="setClipDuration(90)">90 сек</div>
+          <div class="preset-pill" onclick="setClipDuration(120)">120 сек</div>
+        </div>
+        <div class="form-row">
+          <div class="col">
+            <label>Длина ролика (сек)</label>
+            <input type="number" id="batchDurationInput" value="60" min="15" max="300" onchange="updateBatchCalc()">
+          </div>
+          <div class="col">
+            <label>Старт с секунды</label>
+            <input type="number" id="batchOffsetInput" value="0" min="0" onchange="updateBatchCalc()">
+          </div>
+        </div>
+        <div id="batchSummaryBox" class="summary-box">
+          Будет создано: <b id="calcPartsCount" style="color: var(--accent-green);">0</b> роликов со сдвигом сабвея.
+        </div>
+        <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="startBatchRender()">
+          ⚡ Нарезать всю серию роликов
+        </button>
+      </div>
+
+      <div id="singleControls" style="display: none;">
+        <div class="form-row">
+          <div class="col">
+            <label>Старт (сек)</label>
+            <input type="number" id="singleStartInput" value="0" min="0">
+          </div>
+          <div class="col">
+            <label>Длительность (сек)</label>
+            <input type="number" id="singleDurationInput" value="60" min="10" max="300">
+          </div>
+          <div class="col">
+            <label>Сдвиг сабвея (сек)</label>
+            <input type="number" id="singleBgOffsetInput" value="0" min="0">
+          </div>
+        </div>
+        <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="startSingleRender()">
+          ✂️ Собрать одиночный клип
+        </button>
+      </div>
+
+    </div>
+
+    <!-- CENTER COLUMN: Interactive Phone Mockup -->
+    <div class="card preview-card" style="align-items: center;">
+      <div class="card-title" style="width: 100%;">
+        <span>📱 Предпросмотр 9:16 (TikTok / Shorts)</span>
+      </div>
+
+      <div class="phone-preview-wrapper">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <div class="preview-split" id="previewSplitBox">
+            <!-- Top half: Main video -->
+            <div class="preview-top" id="mockTop" style="flex: 0.5;">
+              <img src="/static/thumb_top.jpg" id="mockTopImg" alt="Top video">
+              <!-- Live Subtitles (1 word at a time) -->
+              <div class="mock-subtitles-box" id="mockSubs">ХАЙП!</div>
+            </div>
+
+            <!-- Bottom half: Subway Surfers -->
+            <div class="preview-bottom" id="mockBottom" style="flex: 0.5;">
+              <img src="/static/thumb_bottom.jpg" id="mockBottomImg" alt="Subway Surfers">
+            </div>
+
+            <!-- Exact Center Animated Banner -->
+            <img src="/static/test_alpha_3.5.png" class="preview-banner" id="mockBanner" alt="Баннер БУБА VPN">
+
+            <!-- Mock TikTok UI overlay -->
+            <div class="phone-overlay-ui">
+              <div class="mock-icon">❤️</div>
+              <div class="mock-icon">💬</div>
+              <div class="mock-icon">↗️</div>
+            </div>
+
+            <div class="mock-caption">
+              <b>@user</b><br>
+              Смотри до конца! #бубавпн
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-muted); text-align: center;">
+          Реальный вид ролика 9:16 с баннером $\ge 25\%$ и авто-субтитрами
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Tasks & Gallery -->
+    <div class="clips-column">
+      
+      <!-- Task Queue -->
+      <div class="card">
+        <div class="card-title">
+          <span>⚙️ Очередь рендеринга</span>
+          <span id="taskCountBadge" style="font-size: 12px; background: var(--bg-card); padding: 2px 8px; border-radius: 10px;">0 задач</span>
+        </div>
+        <div id="taskList" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px;">
+            Нет активных задач рендеринга.
+          </div>
+        </div>
+      </div>
+
+      <!-- Finished Clips Gallery -->
+      <div class="card">
+        <div class="card-title" style="justify-content: space-between;">
+          <span>🎉 Готовые нарезки</span>
+          <button class="btn-secondary" onclick="loadClips()">🔄 Обновить</button>
+        </div>
+        
+        <div id="clipsGrid" class="clip-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

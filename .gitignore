@@ -1,0 +1,35 @@
+# Python Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Bytecode and Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Large Media Files (Avoid GitHub 100MB file limit)
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+!реклама.webm
+*.wav
+*.mp3
+
+# Output directory and temp processing files
+output/
+*.temp.wav
+*.sub.ass
+test_*.ass
+test_*.wav
+frame_*.jpg
+frame_*.png
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
