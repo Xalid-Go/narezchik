@@ -328,7 +328,7 @@ function switchMode(mode) {
 
 function setClipDuration(seconds) {
   document.getElementById('batchDurationInput').value = seconds;
-  document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.preset-chip, .preset-pill').forEach(el => el.classList.remove('active'));
   const pill = document.getElementById(`pill${seconds}`);
   if (pill) pill.classList.add('active');
   updateBatchCalc();

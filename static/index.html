@@ -3,295 +3,350 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BubaClipper Studio Pro - Нарезка роликов под БУБА VPN</title>
+  <title>BubaCut Studio - Монтаж и нарезка роликов</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d2ff'><path d='M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z'/></svg>">
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo-area">
-      <div class="logo-badge">BUBA</div>
-      <div class="logo-title">Clipper Studio Pro 🚀</div>
+  <!-- TOP NAVIGATION BAR (CapCut Style) -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <line x1="2" y1="7" x2="7" y2="7"></line>
+          <line x1="2" y1="17" x2="7" y2="17"></line>
+          <line x1="17" y1="17" x2="22" y2="17"></line>
+          <line x1="17" y1="7" x2="22" y2="7"></line>
+        </svg>
+        <span class="brand-name">BUBA<span class="brand-accent">CUT</span></span>
+        <span class="brand-tag">STUDIO</span>
+      </div>
+      <div class="project-info">
+        <span>Проект: Вертикальный клип 9:16 (1080×1920)</span>
+      </div>
     </div>
-    <div class="header-status">
-      <div class="pulse-dot"></div>
-      <span id="hwAccelText">Metal H.264 Hardware Acceleration Active</span>
+    
+    <div class="header-right">
+      <div class="system-status">
+        <span class="status-indicator"></span>
+        <span id="hwAccelText">Metal H.264 Acceleration Active</span>
+      </div>
     </div>
   </header>
 
-  <!-- MAIN CONTAINER (3 COLUMNS) -->
-  <div class="main-container">
+  <!-- MAIN WORKSPACE (3-COLUMN STUDIO LAYOUT) -->
+  <div class="workspace-grid">
 
-    <!-- LEFT COLUMN: Studio Controls -->
-    <div class="card editor-card">
+    <!-- LEFT PANEL: INSPECTOR & CONTROLS -->
+    <aside class="panel inspector-panel">
       
-      <!-- Source Files & Import -->
-      <div class="card-title">
-        <span>🎬 Исходные материалы</span>
-      </div>
-
-      <div class="import-section">
-        <div class="import-label">📥 Скачать по ссылке (YouTube / Shorts / TikTok):</div>
-        <div class="input-with-button">
-          <input type="text" id="urlDownloadInput" placeholder="Вставьте ссылку на ролик...">
-          <button class="btn-action" id="btnDownloadUrl" onclick="downloadVideoFromUrl()">⬇️ Скачать</button>
+      <!-- Section: Media Files -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Медиафайлы</span>
         </div>
-        <div id="urlDownloadStatus" class="status-msg" style="display: none;"></div>
 
-        <div class="file-upload-row">
-          <span>Или выберите файл с диска:</span>
-          <label class="btn-secondary file-label">
-            📁 Загрузить файл
-            <input type="file" id="fileUploadInput" onchange="uploadLocalFile(event)" accept="video/*,.webm,.mp4,.mov">
-          </label>
+        <div class="import-box">
+          <label class="field-label">Импорт по ссылке (YouTube / TikTok / Shorts)</label>
+          <div class="input-action-group">
+            <input type="text" id="urlDownloadInput" class="text-input" placeholder="Вставьте URL видео...">
+            <button class="btn-action" id="btnDownloadUrl" onclick="downloadVideoFromUrl()">Скачать</button>
+          </div>
+          <div id="urlDownloadStatus" class="inline-status"></div>
+
+          <div class="upload-divider">
+            <span>или</span>
+          </div>
+
+          <div class="upload-action-row">
+            <label class="btn-file-upload">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Выбрать с диска
+              <input type="file" id="fileUploadInput" onchange="uploadLocalFile(event)" accept="video/*,.webm,.mp4,.mov">
+            </label>
+          </div>
+          <div id="fileUploadStatus" class="inline-status"></div>
         </div>
-        <div id="fileUploadStatus" class="status-msg" style="display: none;"></div>
-      </div>
 
-      <div class="form-group">
-        <label>Основное видео (Спикер / Подкаст)</label>
-        <select id="mainVideoSelect"></select>
-        <div id="mainVideoInfo" class="input-info"></div>
-      </div>
+        <div class="field-group">
+          <label class="field-label">Спикер (Верхнее видео)</label>
+          <select id="mainVideoSelect" class="select-input"></select>
+          <div id="mainVideoInfo" class="field-hint"></div>
+        </div>
 
-      <div class="form-group">
-        <label>Фоновое видео (Subway Surfers)</label>
-        <select id="bgVideoSelect"></select>
-        <div id="bgVideoInfo" class="input-info"></div>
-      </div>
+        <div class="field-group">
+          <label class="field-label">Геймплей (Нижнее видео)</label>
+          <select id="bgVideoSelect" class="select-input"></select>
+          <div id="bgVideoInfo" class="field-hint"></div>
+        </div>
 
-      <div class="form-group">
-        <label>Анимированный баннер (@bubabot)</label>
-        <select id="bannerSelect"></select>
-      </div>
-
-      <!-- Split Ratio Customizer -->
-      <div class="card-title" style="margin-top: 6px;">
-        <span>🎚️ Разделение экрана (Сплит)</span>
-        <span id="splitRatioLabel" class="accent-badge">50% / 50%</span>
-      </div>
-      <div class="form-group">
-        <input type="range" id="splitRatioSlider" min="30" max="70" value="50" step="5" oninput="updateSplitRatio(this.value)">
-        <div class="slider-labels">
-          <span>Спикер 70%</span>
-          <span>50/50</span>
-          <span>Сабвей 70%</span>
+        <div class="field-group">
+          <label class="field-label">Рекламный баннер</label>
+          <select id="bannerSelect" class="select-input"></select>
         </div>
       </div>
 
-      <!-- Subtitle Styling Controls -->
-      <div class="card-title" style="margin-top: 6px;">
-        <span>💬 Стиль субтитров (Whisper AI)</span>
+      <!-- Section: Split Screen Controls -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Разделение экрана</span>
+          <span id="splitRatioLabel" class="value-tag">50% / 50%</span>
+        </div>
+        <div class="slider-container">
+          <input type="range" id="splitRatioSlider" class="range-slider" min="30" max="70" value="50" step="5" oninput="updateSplitRatio(this.value)">
+          <div class="slider-marks">
+            <span>Спикер 70%</span>
+            <span>50 / 50</span>
+            <span>Сабвей 70%</span>
+          </div>
+        </div>
       </div>
-      <div class="sub-styling-box">
-        <label class="checkbox-row">
+
+      <!-- Section: Subtitles (TikTok Viral 1-Word) -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Субтитры (Whisper AI)</span>
+          <span class="badge-accent">По 1 слову</span>
+        </div>
+
+        <label class="toggle-row">
           <input type="checkbox" id="generateSubtitlesCheck" checked onchange="updateMockSubs()">
-          <b>Генерировать субтитры в стиле TikTok</b>
+          <span class="toggle-label">Генерация вирусных субтитров</span>
         </label>
-        <div class="form-row">
-          <div class="col">
-            <label>Шрифт</label>
-            <select id="subFontSelect" onchange="updateMockSubs()">
+
+        <div class="grid-2-col">
+          <div class="field-group">
+            <label class="field-label">Шрифт</label>
+            <select id="subFontSelect" class="select-input" onchange="updateMockSubs()">
               <option value="Arial Black" selected>Arial Black (Жирный)</option>
               <option value="Impact">Impact (Классика)</option>
               <option value="Helvetica">Helvetica Bold</option>
               <option value="Arial">Arial Bold</option>
             </select>
           </div>
-          <div class="col">
-            <label>Цвет текста</label>
-            <select id="subColorSelect" onchange="updateMockSubs()">
-              <option value="yellow" selected>🟡 Желтый TikTok</option>
-              <option value="green">🟢 Неоновый зеленый</option>
-              <option value="cyan">🔵 Циан / Голубой</option>
-              <option value="white">⚪ Чистый белый</option>
-              <option value="fire">🔥 Огненный акцент</option>
+          <div class="field-group">
+            <label class="field-label">Цвет текста</label>
+            <select id="subColorSelect" class="select-input" onchange="updateMockSubs()">
+              <option value="yellow" selected>TikTok Желтый</option>
+              <option value="green">Неоновый Зеленый</option>
+              <option value="cyan">Электрик Циан</option>
+              <option value="white">Чистый Белый</option>
+              <option value="fire">Огненный Акцент</option>
             </select>
           </div>
         </div>
-        <div class="form-row">
-          <div class="col">
-            <label>Размер: <span id="subSizeVal">56px</span></label>
-            <input type="range" id="subSizeSlider" min="36" max="76" value="56" oninput="updateMockSubs()">
+
+        <div class="grid-2-col" style="margin-top: 6px;">
+          <div class="field-group">
+            <div class="slider-header">
+              <label class="field-label">Размер</label>
+              <span id="subSizeVal" class="slider-num">56px</span>
+            </div>
+            <input type="range" id="subSizeSlider" class="range-slider" min="36" max="76" value="56" oninput="updateMockSubs()">
           </div>
-          <div class="col">
-            <label>Обводка: <span id="subStrokeVal">5px</span></label>
-            <input type="range" id="subStrokeSlider" min="2" max="8" value="5" oninput="updateMockSubs()">
+          <div class="field-group">
+            <div class="slider-header">
+              <label class="field-label">Обводка</label>
+              <span id="subStrokeVal" class="slider-num">5px</span>
+            </div>
+            <input type="range" id="subStrokeSlider" class="range-slider" min="2" max="8" value="5" oninput="updateMockSubs()">
           </div>
         </div>
       </div>
 
-      <!-- Banner Rules & Chroma Settings -->
-      <div class="card-title" style="margin-top: 6px;">
-        <span>🎯 Баннер BUBA VPN (Гарантия $\ge 25\%$)</span>
-      </div>
-      <div class="banner-settings-box">
-        <div class="preset-pills">
-          <div class="preset-pill active" id="pillBannerEdge" onclick="setBannerPreset('edge')">🛡️ 1260×550 (25.8% Норма)</div>
-          <div class="preset-pill" id="pillBannerSafe" onclick="setBannerPreset('safe')">🔥 1320×575 (27.5% Запас)</div>
-          <div class="preset-pill" id="pillBanner25" onclick="setBannerPreset('25')">⚠️ 1080×434 (18.5% Риск)</div>
-        </div>
-        <div id="bannerPctLabel" class="banner-coverage-label">
-          ✅ Чистая видимая площадь баннера: 25.79% (Гарантированная выплата)
+      <!-- Section: Banner Rules & Chroma -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Баннер BUBA VPN</span>
+          <span class="badge-success">Правило $\ge 25\%$</span>
         </div>
 
-        <label class="checkbox-row" style="margin-top: 8px;">
-          <input type="checkbox" id="pauseOnBannerCheck" checked>
-          <span><b>⏸️ Заморозка видео на время рекламы</b> (голос не прерывается)</span>
-        </label>
+        <div class="segmented-control">
+          <button class="seg-btn active" id="pillBannerEdge" onclick="setBannerPreset('edge')">1260×550 (25.8%)</button>
+          <button class="seg-btn" id="pillBannerSafe" onclick="setBannerPreset('safe')">1320×575 (27.5%)</button>
+          <button class="seg-btn" id="pillBanner25" onclick="setBannerPreset('25')">1080×434 (18.5%)</button>
+        </div>
 
-        <label class="checkbox-row">
-          <input type="checkbox" id="removeBlueBgCheck">
-          <span><b>🎬 Удаление синего фона (ChromaKey + Despill)</b></span>
-        </label>
+        <div id="bannerPctLabel" class="coverage-status">
+          Чистая видимая площадь баннера: 25.79% (Гарантированная выплата)
+        </div>
 
-        <div style="margin-top: 8px;">
-          <label style="font-size: 11px; color: var(--text-muted);">Скорость баннера (Правило 3.6: до 1.2×):</label>
-          <div class="preset-pills" style="margin-top: 4px;">
-            <div class="preset-pill active" id="speed10" onclick="setBannerSpeed(1.0)">1.0× Обычная</div>
-            <div class="preset-pill" id="speed11" onclick="setBannerSpeed(1.1)">1.1× (+10%)</div>
-            <div class="preset-pill" id="speed12" onclick="setBannerSpeed(1.2)">1.2× Максимум</div>
+        <div class="toggle-list">
+          <label class="toggle-row">
+            <input type="checkbox" id="pauseOnBannerCheck" checked>
+            <span class="toggle-label">Заморозка видео на время баннера (голос не прерывается)</span>
+          </label>
+
+          <label class="toggle-row">
+            <input type="checkbox" id="removeBlueBgCheck">
+            <span class="toggle-label">Удаление синего фона (ChromaKey + Despill)</span>
+          </label>
+        </div>
+
+        <div class="field-group" style="margin-top: 10px;">
+          <label class="field-label">Скорость баннера (Правило 3.6: до 1.2×)</label>
+          <div class="segmented-control">
+            <button class="seg-btn active" id="speed10" onclick="setBannerSpeed(1.0)">1.0×</button>
+            <button class="seg-btn" id="speed11" onclick="setBannerSpeed(1.1)">1.1×</button>
+            <button class="seg-btn" id="speed12" onclick="setBannerSpeed(1.2)">1.2×</button>
           </div>
         </div>
 
-        <div class="mirror-row">
-          <span style="color: var(--text-muted); font-size: 12px;">🪞 Зеркало (hflip):</span>
-          <label class="checkbox-inline"><input type="checkbox" id="mirrorTopCheck"> Спикер</label>
-          <label class="checkbox-inline"><input type="checkbox" id="mirrorBottomCheck"> Сабвей</label>
+        <div class="mirror-controls">
+          <span class="field-label">Зеркалирование (hflip):</span>
+          <div class="mirror-toggles">
+            <label class="toggle-mini"><input type="checkbox" id="mirrorTopCheck"> Спикер</label>
+            <label class="toggle-mini"><input type="checkbox" id="mirrorBottomCheck"> Сабвей</label>
+          </div>
         </div>
       </div>
 
-      <!-- Mode Selector & Render Triggers -->
-      <div class="tabs" style="margin-top: 6px;">
-        <button class="tab-btn active" id="tabBatch" onclick="switchMode('batch')">⚡ Пакетная нарезка</button>
-        <button class="tab-btn" id="tabSingle" onclick="switchMode('single')">✂️ Одиночный клип</button>
+      <!-- Section: Export / Render Controls -->
+      <div class="section-card export-card">
+        <div class="tab-switch">
+          <button class="mode-tab active" id="tabBatch" onclick="switchMode('batch')">Пакетная нарезка</button>
+          <button class="mode-tab" id="tabSingle" onclick="switchMode('single')">Одиночный клип</button>
+        </div>
+
+        <div id="batchControls">
+          <div class="time-presets">
+            <button class="preset-chip" onclick="setClipDuration(45)">45с</button>
+            <button class="preset-chip active" id="pill60" onclick="setClipDuration(60)">60с</button>
+            <button class="preset-chip" onclick="setClipDuration(75)">75с</button>
+            <button class="preset-chip" onclick="setClipDuration(90)">90с</button>
+            <button class="preset-chip" onclick="setClipDuration(120)">120с</button>
+          </div>
+
+          <div class="grid-2-col">
+            <div class="field-group">
+              <label class="field-label">Длина клипа (сек)</label>
+              <input type="number" id="batchDurationInput" class="text-input" value="60" min="15" max="300" onchange="updateBatchCalc()">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Старт с секунды</label>
+              <input type="number" id="batchOffsetInput" class="text-input" value="0" min="0" onchange="updateBatchCalc()">
+            </div>
+          </div>
+
+          <div id="batchSummaryBox" class="batch-summary">
+            Будет создано: <span id="calcPartsCount" class="summary-highlight">0</span> клипов
+          </div>
+
+          <button class="btn-primary-export" onclick="startBatchRender()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Нарезать серию клипов
+          </button>
+        </div>
+
+        <div id="singleControls" style="display: none;">
+          <div class="grid-3-col">
+            <div class="field-group">
+              <label class="field-label">Старт (с)</label>
+              <input type="number" id="singleStartInput" class="text-input" value="0" min="0">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Длительность</label>
+              <input type="number" id="singleDurationInput" class="text-input" value="60" min="10" max="300">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Сдвиг сабвея</label>
+              <input type="number" id="singleBgOffsetInput" class="text-input" value="0" min="0">
+            </div>
+          </div>
+
+          <button class="btn-primary-export" onclick="startSingleRender()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Собрать одиночный клип
+          </button>
+        </div>
       </div>
 
-      <div id="batchControls">
-        <div class="preset-pills" style="margin-bottom: 8px;">
-          <div class="preset-pill" onclick="setClipDuration(45)">45 сек</div>
-          <div class="preset-pill active" id="pill60" onclick="setClipDuration(60)">60 сек</div>
-          <div class="preset-pill" onclick="setClipDuration(75)">75 сек</div>
-          <div class="preset-pill" onclick="setClipDuration(90)">90 сек</div>
-          <div class="preset-pill" onclick="setClipDuration(120)">120 сек</div>
-        </div>
-        <div class="form-row">
-          <div class="col">
-            <label>Длина ролика (сек)</label>
-            <input type="number" id="batchDurationInput" value="60" min="15" max="300" onchange="updateBatchCalc()">
-          </div>
-          <div class="col">
-            <label>Старт с секунды</label>
-            <input type="number" id="batchOffsetInput" value="0" min="0" onchange="updateBatchCalc()">
-          </div>
-        </div>
-        <div id="batchSummaryBox" class="summary-box">
-          Будет создано: <b id="calcPartsCount" style="color: var(--accent-green);">0</b> роликов со сдвигом сабвея.
-        </div>
-        <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="startBatchRender()">
-          ⚡ Нарезать всю серию роликов
-        </button>
+    </aside>
+
+    <!-- CENTER PANEL: MONITOR & PHONE PREVIEW -->
+    <main class="panel monitor-panel">
+      <div class="monitor-top-bar">
+        <span class="monitor-title">Монитор предпросмотра (9:16)</span>
+        <div class="monitor-res">1080 × 1920 • 60 FPS</div>
       </div>
 
-      <div id="singleControls" style="display: none;">
-        <div class="form-row">
-          <div class="col">
-            <label>Старт (сек)</label>
-            <input type="number" id="singleStartInput" value="0" min="0">
-          </div>
-          <div class="col">
-            <label>Длительность (сек)</label>
-            <input type="number" id="singleDurationInput" value="60" min="10" max="300">
-          </div>
-          <div class="col">
-            <label>Сдвиг сабвея (сек)</label>
-            <input type="number" id="singleBgOffsetInput" value="0" min="0">
-          </div>
-        </div>
-        <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="startSingleRender()">
-          ✂️ Собрать одиночный клип
-        </button>
-      </div>
-
-    </div>
-
-    <!-- CENTER COLUMN: Interactive Phone Mockup -->
-    <div class="card preview-card" style="align-items: center;">
-      <div class="card-title" style="width: 100%;">
-        <span>📱 Предпросмотр 9:16 (TikTok / Shorts)</span>
-      </div>
-
-      <div class="phone-preview-wrapper">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
+      <div class="phone-viewport-container">
+        <div class="phone-chassis">
+          <div class="camera-island"></div>
           
-          <div class="preview-split" id="previewSplitBox">
-            <!-- Top half: Main video -->
-            <div class="preview-top" id="mockTop" style="flex: 0.5;">
-              <img src="/static/thumb_top.jpg" id="mockTopImg" alt="Top video">
-              <!-- Live Subtitles (1 word at a time) -->
-              <div class="mock-subtitles-box" id="mockSubs">ХАЙП!</div>
+          <div class="screen-canvas" id="previewSplitBox">
+            <!-- Top Segment (Speaker) -->
+            <div class="screen-half top-half" id="mockTop" style="flex: 0.5;">
+              <img src="/static/thumb_top.jpg" id="mockTopImg" alt="Спикер">
+              <!-- Live Single-Word Subtitle -->
+              <div class="subtitle-overlay" id="mockSubs">ХАЙП!</div>
             </div>
 
-            <!-- Bottom half: Subway Surfers -->
-            <div class="preview-bottom" id="mockBottom" style="flex: 0.5;">
-              <img src="/static/thumb_bottom.jpg" id="mockBottomImg" alt="Subway Surfers">
+            <!-- Bottom Segment (Gameplay) -->
+            <div class="screen-half bottom-half" id="mockBottom" style="flex: 0.5;">
+              <img src="/static/thumb_bottom.jpg" id="mockBottomImg" alt="Сабвей">
             </div>
 
             <!-- Exact Center Animated Banner -->
-            <img src="/static/test_alpha_3.5.png" class="preview-banner" id="mockBanner" alt="Баннер БУБА VPN">
+            <img src="/static/test_alpha_3.5.png" class="banner-overlay-preview" id="mockBanner" alt="Баннер БУБА VPN">
 
-            <!-- Mock TikTok UI overlay -->
-            <div class="phone-overlay-ui">
-              <div class="mock-icon">❤️</div>
-              <div class="mock-icon">💬</div>
-              <div class="mock-icon">↗️</div>
+            <!-- TikTok Mockup Elements -->
+            <div class="tiktok-sidebar">
+              <div class="tiktok-action-btn">❤️</div>
+              <div class="tiktok-action-btn">💬</div>
+              <div class="tiktok-action-btn">↗️</div>
             </div>
 
-            <div class="mock-caption">
-              <b>@user</b><br>
-              Смотри до конца! #бубавпн
+            <div class="tiktok-footer-meta">
+              <span class="tiktok-username">@user</span>
+              <span class="tiktok-desc">Смотри до конца! #бубавпн</span>
             </div>
           </div>
         </div>
-
-        <div style="font-size: 11px; color: var(--text-muted); text-align: center;">
-          Реальный вид ролика 9:16 с баннером $\ge 25\%$ и авто-субтитрами
-        </div>
       </div>
-    </div>
 
-    <!-- RIGHT COLUMN: Tasks & Gallery -->
-    <div class="clips-column">
+      <div class="monitor-bottom-bar">
+        <span>Липсинк: точный (-140 мс) • Пауза баннера: активна</span>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL: QUEUE & FINISHED CLIPS -->
+    <aside class="panel library-panel">
       
-      <!-- Task Queue -->
-      <div class="card">
-        <div class="card-title">
-          <span>⚙️ Очередь рендеринга</span>
-          <span id="taskCountBadge" style="font-size: 12px; background: var(--bg-card); padding: 2px 8px; border-radius: 10px;">0 задач</span>
+      <!-- Render Queue -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Очередь рендеринга</span>
+          <span id="taskCountBadge" class="value-tag">0 задач</span>
         </div>
-        <div id="taskList" style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px;">
-            Нет активных задач рендеринга.
-          </div>
+        <div id="taskList" class="task-queue-list">
+          <div class="empty-placeholder">Нет активных задач рендеринга</div>
         </div>
       </div>
 
-      <!-- Finished Clips Gallery -->
-      <div class="card">
-        <div class="card-title" style="justify-content: space-between;">
-          <span>🎉 Готовые нарезки</span>
-          <button class="btn-secondary" onclick="loadClips()">🔄 Обновить</button>
+      <!-- Finished Clips Library -->
+      <div class="section-card library-card">
+        <div class="section-header">
+          <span class="section-title">Готовые клипы</span>
+          <button class="btn-icon-refresh" onclick="loadClips()" title="Обновить список">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </button>
         </div>
-        
-        <div id="clipsGrid" class="clip-grid">
-          <!-- Populated by JS -->
+
+        <div id="clipsGrid" class="clips-gallery-grid">
+          <div class="empty-placeholder">Здесь появятся готовые ролики</div>
         </div>
       </div>
 
-    </div>
+    </aside>
 
   </div>
 
