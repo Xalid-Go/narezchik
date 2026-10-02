@@ -80,7 +80,7 @@ setInterval(() => {
   }
 }, 650);
 
-// Helper for safe JSON fetching with Codespaces Private port detection
+// Helper for safe JSON fetching with Codespaces status detection
 async function safeFetchJson(url, options = {}) {
   const res = await fetch(url, options);
   const ct = res.headers.get('content-type') || '';
@@ -89,10 +89,18 @@ async function safeFetchJson(url, options = {}) {
     return { ok: res.ok, status: res.status, data };
   }
   const text = await res.text();
-  if (text.includes('Codespaces') || text.includes('<html') || text.includes('<!DOCTYPE')) {
-    throw new Error('Порт 8000 закрыт (Private)! Во вкладке PORTS внизу нажмите правой кнопкой на 8000 -> Port Visibility -> Public');
+  const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].trim() : '';
+
+  if (res.status === 502 || res.status === 503 || text.toLowerCase().includes('refused') || text.toLowerCase().includes('bad gateway')) {
+    throw new Error('Сервер не запущен в терминале! Запустите: git pull && ./run_codespaces.sh');
   }
-  throw new Error(text.slice(0, 150) || `HTTP error ${res.status}`);
+
+  if (title.toLowerCase().includes('codespaces') || text.includes('github.dev')) {
+    throw new Error(`Codespaces: "${title || 'Требуется подтверждение'}". Откройте сайт в отдельной вкладке и нажмите Continue!`);
+  }
+
+  throw new Error(title || text.replace(/<[^>]*>/g, '').trim().slice(0, 100) || `HTTP ${res.status}`);
 }
 
 // ------------------ FILE MANAGEMENT ------------------
