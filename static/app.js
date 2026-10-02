@@ -234,28 +234,66 @@ async function uploadLocalFile(event) {
 
   status.style.display = 'block';
   status.style.color = 'var(--accent-blue)';
-  status.innerText = `⏳ Загрузка файла ${file.name}...`;
 
-  const formData = new FormData();
-  formData.append('file', file);
+  const CHUNK_SIZE = 8 * 1024 * 1024; // 8 MB chunks to strictly bypass proxy 413 limit
+  const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+  const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 
   try {
-    const { ok, data } = await safeFetchJson('/api/upload', {
-      method: 'POST',
-      body: formData
-    });
-    if (ok) {
+    if (totalChunks <= 1) {
+      status.innerText = `⏳ Загрузка файла ${file.name}...`;
+      const formData = new FormData();
+      formData.append('file', file);
+      const { ok, data } = await safeFetchJson('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (!ok) throw new Error(data?.detail || 'Ошибка загрузки');
       status.style.color = 'var(--accent-green)';
-      status.innerText = `✅ Файл ${data.filename} загружен и доступен в списке!`;
+      status.innerText = `✅ Файл ${data.filename} успешно загружен!`;
       await loadFiles();
       if (file.name.includes('баннер') || file.name.includes('реклама') || file.name.endsWith('.webm')) {
         document.getElementById('bannerSelect').value = data.filename;
       } else {
         document.getElementById('mainVideoSelect').value = data.filename;
       }
-    } else {
-      status.style.color = '#ff5252';
-      status.innerText = '❌ Ошибка при загрузке: ' + (data.detail || 'Неизвестная ошибка');
+      return;
+    }
+
+    // Multi-chunk upload with live percentage
+    for (let chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++) {
+      const start = chunkIdx * CHUNK_SIZE;
+      const end = Math.min(file.size, start + CHUNK_SIZE);
+      const chunkBlob = file.slice(start, end);
+
+      const pct = Math.round((chunkIdx / totalChunks) * 100);
+      status.innerText = `⏳ Загрузка файла: ${pct}% (часть ${chunkIdx + 1} из ${totalChunks})...`;
+
+      const chunkForm = new FormData();
+      chunkForm.append('file', chunkBlob, file.name);
+      chunkForm.append('upload_id', uploadId);
+      chunkForm.append('chunk_index', chunkIdx);
+      chunkForm.append('total_chunks', totalChunks);
+      chunkForm.append('filename', file.name);
+
+      const { ok, data } = await safeFetchJson('/api/upload-chunk', {
+        method: 'POST',
+        body: chunkForm
+      });
+
+      if (!ok) throw new Error(data?.detail || `Сбой на части ${chunkIdx + 1}`);
+
+      if (data.completed) {
+        status.style.color = 'var(--accent-green)';
+        status.innerText = `✅ Файл ${data.filename} успешно загружен на 100%!`;
+        await loadFiles();
+        if (file.name.includes('баннер') || file.name.includes('реклама') || file.name.endsWith('.webm')) {
+          document.getElementById('bannerSelect').value = data.filename;
+        } else {
+          document.getElementById('mainVideoSelect').value = data.filename;
+        }
+        return;
+      }
     }
   } catch (err) {
     status.style.color = '#ff5252';

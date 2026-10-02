@@ -11,6 +11,7 @@ Provides REST APIs for:
 - Web UI serving
 """
 import os
+import sys
 import uuid
 import asyncio
 from pathlib import Path
@@ -171,17 +172,60 @@ async def api_upload_file(file: UploadFile = File(...)):
     return {"success": True, "filename": safe_name, "info": info}
 
 
+@app.post("/api/upload-chunk")
+async def api_upload_chunk(
+    file: UploadFile = File(...),
+    upload_id: str = Form(...),
+    chunk_index: int = Form(...),
+    total_chunks: int = Form(...),
+    filename: str = Form(...)
+):
+    """
+    Chunked upload endpoint: accepts 5-10MB pieces to bypass proxy 413 limits.
+    Reassembles the full file once all chunks arrive.
+    """
+    temp_dir = BASE_DIR / "temp_uploads" / upload_id
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    chunk_path = temp_dir / f"chunk_{chunk_index:05d}"
+    with open(chunk_path, "wb") as f:
+        f.write(await file.read())
+
+    existing_chunks = list(temp_dir.glob("chunk_*"))
+    if len(existing_chunks) == total_chunks:
+        safe_name = os.path.basename(filename)
+        dest_path = BASE_DIR / safe_name
+        with open(dest_path, "wb") as out_f:
+            for idx in range(total_chunks):
+                c_part = temp_dir / f"chunk_{idx:05d}"
+                if c_part.exists():
+                    with open(c_part, "rb") as in_f:
+                        out_f.write(in_f.read())
+                    try:
+                        c_part.unlink()
+                    except Exception:
+                        pass
+        try:
+            temp_dir.rmdir()
+        except Exception:
+            pass
+        info = probe_file(str(dest_path))
+        return {"success": True, "completed": True, "filename": safe_name, "info": info}
+
+    return {"success": True, "completed": False, "progress": round((len(existing_chunks) / total_chunks) * 100, 1)}
+
+
 @app.post("/api/download-url")
 async def api_download_url(req: DownloadUrlRequest):
-    """Downloads a video by URL using yt-dlp directly into the project."""
+    """Downloads a video by URL using yt-dlp with android player client to bypass YouTube datacenter bot checks."""
     url = req.url.strip()
     if not url:
         raise HTTPException(status_code=400, detail="Укажите ссылку на видео")
     
     out_tmpl = str(BASE_DIR / "%(title).40s_%(id)s.%(ext)s")
     cmd = [
-        "yt-dlp",
+        sys.executable, "-m", "yt_dlp",
         "--no-playlist",
+        "--extractor-args", "youtube:player_client=android,web",
         "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "--merge-output-format", "mp4",
         "-o", out_tmpl,
