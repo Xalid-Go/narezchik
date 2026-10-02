@@ -80,11 +80,26 @@ setInterval(() => {
   }
 }, 650);
 
+// Helper for safe JSON fetching with Codespaces Private port detection
+async function safeFetchJson(url, options = {}) {
+  const res = await fetch(url, options);
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  }
+  const text = await res.text();
+  if (text.includes('Codespaces') || text.includes('<html') || text.includes('<!DOCTYPE')) {
+    throw new Error('Порт 8000 закрыт (Private)! Во вкладке PORTS внизу нажмите правой кнопкой на 8000 -> Port Visibility -> Public');
+  }
+  throw new Error(text.slice(0, 150) || `HTTP error ${res.status}`);
+}
+
 // ------------------ FILE MANAGEMENT ------------------
 async function loadFiles() {
   try {
-    const res = await fetch('/api/files');
-    const data = await res.json();
+    const { ok, data } = await safeFetchJson('/api/files');
+    if (!ok) return;
     availableFiles = data.files || [];
 
     const mainSelect = document.getElementById('mainVideoSelect');
@@ -182,13 +197,12 @@ async function downloadVideoFromUrl() {
   status.innerText = '⏳ Скачиваем видео через yt-dlp на максимальной скорости...';
 
   try {
-    const res = await fetch('/api/download-url', {
+    const { ok, data } = await safeFetchJson('/api/download-url', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: url })
     });
-    const data = await res.json();
-    if (res.ok) {
+    if (ok) {
       status.style.color = 'var(--accent-green)';
       status.innerText = '✅ Видео успешно загружено в проект!';
       input.value = '';
@@ -199,7 +213,7 @@ async function downloadVideoFromUrl() {
     }
   } catch (err) {
     status.style.color = '#ff5252';
-    status.innerText = '❌ Ошибка сети: ' + err;
+    status.innerText = '❌ ' + (err.message || err);
   } finally {
     btn.disabled = false;
   }
@@ -218,12 +232,11 @@ async function uploadLocalFile(event) {
   formData.append('file', file);
 
   try {
-    const res = await fetch('/api/upload', {
+    const { ok, data } = await safeFetchJson('/api/upload', {
       method: 'POST',
       body: formData
     });
-    const data = await res.json();
-    if (res.ok) {
+    if (ok) {
       status.style.color = 'var(--accent-green)';
       status.innerText = `✅ Файл ${data.filename} загружен и доступен в списке!`;
       await loadFiles();
@@ -238,7 +251,9 @@ async function uploadLocalFile(event) {
     }
   } catch (err) {
     status.style.color = '#ff5252';
-    status.innerText = '❌ Ошибка сети: ' + err;
+    status.innerText = '❌ ' + (err.message || err);
+  } finally {
+    event.target.value = '';
   }
 }
 
@@ -367,7 +382,7 @@ async function startBatchRender() {
   }
 
   try {
-    const res = await fetch('/api/render/batch', {
+    const { ok, data } = await safeFetchJson('/api/render/batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -392,11 +407,14 @@ async function startBatchRender() {
         subtitle_outline: subStroke,
       })
     });
-    const data = await res.json();
-    alert(`Запущен пакетный рендеринг (${data.batch_count} клипов)! Следите за шкалой прогресса справа.`);
-    pollTasks();
+    if (ok) {
+      alert(`Запущен пакетный рендеринг (${data.batch_count} клипов)! Следите за шкалой прогресса справа.`);
+      pollTasks();
+    } else {
+      alert('Ошибка при запуске пакета: ' + (data?.detail || 'Неизвестная ошибка'));
+    }
   } catch (err) {
-    alert('Ошибка при запуске пакета: ' + err);
+    alert('Ошибка: ' + (err.message || err));
   }
 }
 
@@ -420,7 +438,7 @@ async function startSingleRender() {
   const subStroke = parseFloat(document.getElementById('subStrokeSlider').value) || 5.0;
 
   try {
-    const res = await fetch('/api/render/single', {
+    const { ok, data } = await safeFetchJson('/api/render/single', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -445,10 +463,13 @@ async function startSingleRender() {
         subtitle_outline: subStroke,
       })
     });
-    const data = await res.json();
-    pollTasks();
+    if (ok) {
+      pollTasks();
+    } else {
+      alert('Ошибка при запуске: ' + (data?.detail || 'Не удалось создать задачу'));
+    }
   } catch (err) {
-    alert('Ошибка при создании клипа: ' + err);
+    alert('Ошибка: ' + (err.message || err));
   }
 }
 
@@ -461,9 +482,9 @@ function startTaskPolling() {
 
 async function pollTasks() {
   try {
-    const res = await fetch('/api/tasks');
-    const data = await res.json();
-    const tasks = data.tasks || [];
+    const { ok, data } = await safeFetchJson('/api/tasks');
+    if (!ok) return;
+    const tasks = data?.tasks || [];
 
     const badge = document.getElementById('taskCountBadge');
     if (badge) badge.innerText = `${tasks.length} задач`;
@@ -498,16 +519,16 @@ async function pollTasks() {
       loadClips();
     }
   } catch (err) {
-    console.error('Task poll error:', err);
+    console.warn('Task poll waiting for server or public port...');
   }
 }
 
 // ------------------ FINISHED CLIPS GALLERY ------------------
 async function loadClips() {
   try {
-    const res = await fetch('/api/clips');
-    const data = await res.json();
-    const clips = data.clips || [];
+    const { ok, data } = await safeFetchJson('/api/clips');
+    if (!ok) return;
+    const clips = data?.clips || [];
 
     const grid = document.getElementById('clipsGrid');
     if (!grid) return;

@@ -17,6 +17,7 @@ __pycache__/
 *.avi
 *.webm
 !реклама.webm
+!subway_surfers.mp4
 *.wav
 *.mp3
 
