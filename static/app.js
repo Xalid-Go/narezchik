@@ -328,9 +328,23 @@ function switchMode(mode) {
 
 function setClipDuration(seconds) {
   document.getElementById('batchDurationInput').value = seconds;
-  document.querySelectorAll('.preset-chip, .preset-pill').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.preset-chip, .preset-pill').forEach(el => {
+    if (!el.classList.contains('clip-count-chip')) el.classList.remove('active');
+  });
   const pill = document.getElementById(`pill${seconds}`);
   if (pill) pill.classList.add('active');
+  updateBatchCalc();
+}
+
+function setMaxClips(count) {
+  const input = document.getElementById('batchMaxClipsInput');
+  if (input) {
+    input.value = count !== null ? count : '';
+  }
+  document.querySelectorAll('.clip-count-chip').forEach(el => el.classList.remove('active'));
+  const chipId = count ? `countChip_${count}` : 'countChip_all';
+  const chip = document.getElementById(chipId);
+  if (chip) chip.classList.add('active');
   updateBatchCalc();
 }
 
@@ -341,16 +355,30 @@ function updateBatchCalc() {
 
   const clipDur = parseFloat(document.getElementById('batchDurationInput').value) || 60;
   const offset = parseFloat(document.getElementById('batchOffsetInput').value) || 0;
-  const maxClips = parseInt(document.getElementById('batchMaxClipsInput')?.value) || null;
+  const rawMax = document.getElementById('batchMaxClipsInput')?.value;
+  const maxClips = (rawMax && parseInt(rawMax) > 0) ? parseInt(rawMax) : null;
 
   const availableDuration = Math.max(0, mainFile.duration - offset);
-  let parts = Math.floor(availableDuration / clipDur);
-  if (maxClips && maxClips < parts) {
+  const totalPossible = Math.floor(availableDuration / clipDur);
+  let parts = totalPossible;
+  if (maxClips && maxClips < totalPossible) {
     parts = maxClips;
   }
 
   const calcEl = document.getElementById('calcPartsCount');
-  if (calcEl) calcEl.innerText = parts;
+  if (calcEl) {
+    if (maxClips && maxClips < totalPossible) {
+      calcEl.innerText = `${parts} шт (из ${totalPossible} доступных)`;
+    } else {
+      calcEl.innerText = `${parts} шт`;
+    }
+  }
+
+  // Update chip highlights if manual typing
+  document.querySelectorAll('.clip-count-chip').forEach(el => el.classList.remove('active'));
+  const chipId = maxClips ? `countChip_${maxClips}` : 'countChip_all';
+  const chip = document.getElementById(chipId);
+  if (chip) chip.classList.add('active');
 }
 
 function setBannerPreset(preset) {

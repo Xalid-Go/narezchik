@@ -236,6 +236,18 @@
             </div>
           </div>
 
+          <div class="field-group" style="margin-top: 4px;">
+            <label class="field-label">Сколько клипов нарезать?</label>
+            <div class="time-presets" style="margin-top: 4px; margin-bottom: 6px;">
+              <button class="preset-chip clip-count-chip" id="countChip_1" onclick="setMaxClips(1)">1 шт</button>
+              <button class="preset-chip clip-count-chip active" id="countChip_3" onclick="setMaxClips(3)">3 шт</button>
+              <button class="preset-chip clip-count-chip" id="countChip_5" onclick="setMaxClips(5)">5 шт</button>
+              <button class="preset-chip clip-count-chip" id="countChip_10" onclick="setMaxClips(10)">10 шт</button>
+              <button class="preset-chip clip-count-chip" id="countChip_all" onclick="setMaxClips(null)">Все</button>
+            </div>
+            <input type="number" id="batchMaxClipsInput" class="text-input" placeholder="Введите число клипов (например: 3)" value="3" min="1" max="100" oninput="updateBatchCalc()">
+          </div>
+
           <div id="batchSummaryBox" class="batch-summary">
             Будет создано: <span id="calcPartsCount" class="summary-highlight">0</span> клипов
           </div>
